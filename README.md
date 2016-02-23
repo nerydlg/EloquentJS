@@ -1,2 +1,2 @@
 # EloquentJS
-this repository contains the JavaScript exercises, which appear in the Eloquent JavaScript book. Those are used only for education purpose
+this repository contains the JavaScript exercises, which appear in the Eloquent JavaScript book. I used it only for education purpose
