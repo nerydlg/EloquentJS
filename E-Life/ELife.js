@@ -250,7 +250,7 @@ LifeLikeWorld.prototype.letAct = function(critter, vector) {
 var actionTypes = Object.create(null);
 
 actionTypes.grow = function(critter) {
-	critter.energy += 0.5;
+	critter.energy += 0.3;
 	return true;
 };
 
@@ -299,15 +299,19 @@ function Plant(){
 }
 
 Plant.prototype.act = function(view){
-	if(this.energy > 19){
+	if(this.energy > 22){
 		var space = view.find(" ");
 		if(space)
 			return {type: "reproduce", direction: space};
 	}
-	if(this.energy < 20)
+	if(this.energy < 25)
 		return {type: "grow"};
 };
 
+
+/****************************************************
+ ** PlantEater Object				*****
+ ****************************************************/
 
 function PlantEater() {
   this.energy = 20;
@@ -325,6 +329,98 @@ PlantEater.prototype.act = function(view) {
 };
  
 
+/****************************************************
+ ** SmartEater Object				*****
+ ****************************************************/
 
+function SmartEater() {
+	this.energy = 20;
+	this.direction = randomElement(directionNames);
+	this.count = 0;
+}
+
+SmartEater.prototype.act = function(view) {
+	// Only moves 8 times to the same direction and then change 
+	if(this.count > 8){
+		this.count = 0;
+		this.direction = view.find(" ") || "ne";	
+	}
+	var dest = view.look(this.direction);
+	if( dest != " "){
+		// if the destination is a tree and critter is angry then eat
+		if(dest == "*" && this.energy < 30){
+			this.count++;
+			return {type:"eat", direction: this.direction};
+		// if the destination is a tree but critter is not angry then reproduce		
+		}else if(dest == "*" && this.energy > 50){
+			return {type: "reproduce", direction: this.direction};
+		}
+		// if find another critter or rock then change the direction
+		if(dest == "#"  || dest == "o"){
+			this.direction = view.find(" ") || "s"; 
+			return {type: "move", direction: this.direction };	
+		}
+		
+	}else{
+		if(this.energy > 50)
+			return {type: "reproduce", direction: this.direction};
+		else{
+			this.count++;
+			return {type: "move", direction: this.direction }; 
+	
+		}	
+			
+	}
+	
+};
+
+/******************************************************
+ *** Predators Object 				*******
+ ******************************************************/
+function Predator(){
+	this.energy = 60;
+	this.direction = randomElement(directionNames);
+	this.count = 0;	
+}
+
+Predator.prototype.act = function(view){
+	// Only moves 5 times to the same direction and then change 
+	if(this.count > 5){
+		this.count = 0;
+		this.direction = view.find(" ") || "s";	
+	}
+
+	var food = view.find("o");
+	if(food ){
+		this.count  = 0;
+		this.direction = food;		
+	}
+
+	var dest = view.look(this.direction);
+	
+	if( dest != " "){
+		// if the destination is a tree and critter is angry then eat
+		if(dest == "o"){
+			this.count++;
+			return {type:"eat", direction: this.direction};
+		}
+		// if find another a rock then change the direction
+		if(dest == "#" || dest == "*" || dest == "@"){
+			this.count = 0;
+			this.direction = view.find(" ") || "s"; 
+			return {type: "move", direction: this.direction };	
+		}
+		
+	}else{
+		if(this.energy > 65)
+			return {type: "reproduce", direction: this.direction};
+		else{
+			this.count++;
+			return {type: "move", direction: this.direction }; 
+	
+		}	
+			
+	}
+}
 
 
